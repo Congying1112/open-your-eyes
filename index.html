@@ -3,6 +3,14 @@
   <title>Open Your Eyes</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <style>
+    .pass {
+      background-color: green
+    }
+    .fail{
+      background-color: red
+    }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -46,18 +54,20 @@
     <div v-if="cameraPicked!=''&lensPicked!=''">
       <hr>
       <div>==== 拍摄要求 ====</div>
-      <div>1. 16mm螺母占40像素以上，不小于6米拍</div>
+      <div>1. 16mm螺母占40像素以上</div>
       <div>2. 不小于6米拍</div>
-      <div>3. 10米处FOV至少为26度</div>
+      <div>3. 10米处FOV至少为26度（按当前测试结果来估算，z30距离目标10米拍摄重复度满足要求）</div>
       <hr>
       <div>==== 请输入飞行和拍摄约束条件 ====</div>
-      <div>目标物体径向尺寸  <input v-model.number="H" type="number">  mm</div>
-      <div>在离其 <input v-model.number="D" type="number"> 米处拍摄</div>
+      <div>目标物体径向尺寸  <input v-model.number="target.H" type="number">  mm</div>
+      <div>在离其 <input v-model.number="target.D" type="number"> 米以上拍摄</div>
+      <div>至少成像 <input v-model.number="target.p" type="number">像素</div>
+      <div>要求10米处FOV至少为<input v-model.number="target.fov" type="number">度</div>
       <hr>
       <div>==== 成像系统评估 ====</div>
       <div>当前相机镜头组合及约束条件下：</div>
-      <div class="check-ok">目标物体将在成像画面中占 {{p}} 像素</div>
-      <div>成像系统对角FOV为 {{fov}} 度</div>
+      <div :class="p>=target.p ? 'pass' : 'fail'" >目标物体将在成像画面中占 {{p}} 像素</div>
+      <div :class="equFOV>=target.fov ? 'pass' : 'fail'" >成像系统对角FOV为 {{fov}} 度，当前拍摄约束距离（{{target.D}}米）下，相当于10米距离拍摄的{{equFOV}}度</div>
     </div>
     <hr>
   </div>
@@ -91,11 +101,12 @@
         lenses,
         lensPicked: "",
         focus: 0,
-        D: 6,  //拍摄距离，单位m
-        H: 16,  //物体大小，单位mm,
         target: {
+          D: 6,  //拍摄距离，单位m
+          H: 16,  //物体大小，单位mm
           p: 40,  //16mm物体成像至少40pixel
-        }
+          fov: 26 //度
+        },
 
       },
       created: function () {
@@ -113,7 +124,7 @@
         },
         p: function() {
           if (this.cameraPicked != "" && this.lensPicked != "") {
-            return this.maxRevolution * this.H * this.focus / (this.cameras[this.cameraPicked].CSize * 16) / (this.D * 1000);
+            return this.maxRevolution * this.target.H * this.focus / (this.cameras[this.cameraPicked].CSize * 16) / (this.target.D * 1000);
           } else {
             return 0;
           }
@@ -121,6 +132,13 @@
         fov: function() {
           if (this.cameraPicked != "" && this.lensPicked != "") {
             return Math.tanh(this.cameras[this.cameraPicked].CSize * 16/2/this.focus) * 2 * 180 / Math.PI;
+          } else {
+            return 0;
+          }
+        },
+        equFOV: function() {
+          if (this.fov && this.target.D) {
+            return 2 * Math.tanh(this.target.D / 10 * Math.tan(this.fov / 2 / 180 * Math.PI)) * 180 / Math.PI
           } else {
             return 0;
           }
@@ -136,7 +154,7 @@
         },
         lensPicked: function (newLens, oldLens) {
           this.focus = newLens ? (this.lenses[newLens].focus ? this.lenses[newLens].focus : this.lenses[newLens].minFocus) : 0;
-        }
+        },
       },
     })
   </script>
