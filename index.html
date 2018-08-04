@@ -1,0 +1,144 @@
+<html>
+<head>
+  <title>Open Your Eyes</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div>======== 相机 ========</div>
+    <select v-model="cameraPicked">
+      <option disabled value="">请选择相机</option>
+      <option v-for="(item, index) in cameras">
+        {{index}}
+      </option>
+    </select>
+    <div v-if="cameraPicked!=''">
+      <div>= 参数列表 =</div>
+      <div>感光元件尺寸  {{cameras[cameraPicked].CSize}}"</div>
+      <div>最大分辨率    {{cameras[cameraPicked].maxResolution[0]}} * {{cameras[cameraPicked].maxResolution[1]}}</div>
+      <div>最大对角分辨率 {{maxRevolution}}</div>
+      <div>======== 镜头 ========
+        <div v-if="cameras[cameraPicked].availableLenses.length>1">
+          <select v-model="lensPicked">
+            <option disabled value="">请选择镜头</option>
+            <option v-for="index in cameras[cameraPicked].availableLenses">
+              {{index}}
+            </option>
+          </select>
+        </div>
+        <div v-else>{{lensPicked}}</div>
+        <div v-if="lensPicked!=''">
+          <div v-if="lenses[lensPicked].other">{{lenses[lensPicked].other}}</div>
+          <div>= 镜头参数列表 =</div>
+          <div v-if="lenses[lensPicked].focus">
+            <div>焦距：  {{focus}} mm</div>
+            <div>光圈：  f{{lenses[lensPicked].F}}</div>
+          </div>
+          <div v-else>
+              <div>变焦镜头，请调节焦距范围：  {{lenses[lensPicked].minFocus}} <input v-model="focus" type="range" :min="lenses[lensPicked].minFocus" :max="lenses[lensPicked].maxFocus" value="5"/> {{lenses[lensPicked].maxFocus}} mm</div>
+              <div>当前焦距： {{focus}} mm</div>
+              <div>光圈：  f{{lenses[lensPicked].minF}} - f{{lenses[lensPicked].maxF}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="cameraPicked!=''&lensPicked!=''">
+      <hr>
+      <div>==== 拍摄要求 ====</div>
+      <div>1. 16mm螺母占40像素以上，不小于6米拍</div>
+      <div>2. 不小于6米拍</div>
+      <div>3. 10米处FOV至少为26度</div>
+      <hr>
+      <div>==== 请输入飞行和拍摄约束条件 ====</div>
+      <div>目标物体径向尺寸  <input v-model.number="H" type="number">  mm</div>
+      <div>在离其 <input v-model.number="D" type="number"> 米处拍摄</div>
+      <hr>
+      <div>==== 成像系统评估 ====</div>
+      <div>当前相机镜头组合及约束条件下：</div>
+      <div class="check-ok">目标物体将在成像画面中占 {{p}} 像素</div>
+      <div>成像系统对角FOV为 {{fov}} 度</div>
+    </div>
+    <hr>
+  </div>
+  <script>
+    var cameras = {
+      Z30: {CSize: 1/2.8, maxResolution: [1920, 1080], availableLenses: ["Z30自带"]},
+      X4S: {CSize: 1, maxResolution: [5472, 3648], availableLenses: ["X4S自带"]},
+      X5S: {CSize:4/3, maxResolution: [5280, 3956], availableLenses: [
+        "DJI MFT 15mm/1.7 ASPH", "Panasonic Lumix 15mm/1.7", "Panasonic Lumix 14-42mm/3.5-5.6 HD",
+        "Olympus M.Zuiko 12mm/2.0", "Olympus M.Zuiko 17mm/1.8", "Olympus M.Zuiko 25mm/1.8", "Olympus M.Zuiko 45mm/1.8", "Olympus M.Zuiko 9-18mm/4.0-5.6 HD"
+      ]}
+    }
+    var lenses = {
+      "Z30自带": {minFocus: 4.3, maxFocus: 129, minF: 1.6, maxF: 4.7},
+      "X4S自带": {focus: 8.8},
+      "DJI MFT 15mm/1.7 ASPH": {focus: 15, F:1.7, other: "需安装配重圈和遮光罩"},
+      "Panasonic Lumix 15mm/1.7": {focus: 15, F: 1.7, other: "需安装配重圈和遮光罩"},
+      "Panasonic Lumix 14-42mm/3.5-5.6 HD": {minFocus: 14, maxFocus: 42, minF: 3.5, maxF:5.6},
+      "Olympus M.Zuiko 12mm/2.0": {focus: 12, F: 2.0, other: "需安装配重圈"},
+      "Olympus M.Zuiko 17mm/1.8": {focus: 17, F: 1.8, other: "需安装配重圈"},
+      "Olympus M.Zuiko 25mm/1.8": {focus: 25, F: 1.8},
+      "Olympus M.Zuiko 45mm/1.8": {focus: 45, F: 1.8},
+      "Olympus M.Zuiko 9-18mm/4.0-5.6 HD": {minFocus: 9, maxFocus: 18, minF: 4.0, maxF:5.6},
+    }
+    
+    var app = new Vue({
+      el: '#app',
+      data: {
+        cameras,
+        cameraPicked: "",
+        lenses,
+        lensPicked: "",
+        focus: 0,
+        D: 6,  //拍摄距离，单位m
+        H: 16,  //物体大小，单位mm,
+        target: {
+          p: 40,  //16mm物体成像至少40pixel
+        }
+
+      },
+      created: function () {
+        console.log('created')
+      },
+      computed: {
+        maxRevolution: function() {
+          if (this.cameraPicked != "") {
+            resH = this.cameras[this.cameraPicked].maxResolution[0]
+            resV = this.cameras[this.cameraPicked].maxResolution[1]
+            return Math.sqrt(resH * resH + resV * resV)
+          } else {
+            return 0;
+          }
+        },
+        p: function() {
+          if (this.cameraPicked != "" && this.lensPicked != "") {
+            return this.maxRevolution * this.H * this.focus / (this.cameras[this.cameraPicked].CSize * 16) / (this.D * 1000);
+          } else {
+            return 0;
+          }
+        },
+        fov: function() {
+          if (this.cameraPicked != "" && this.lensPicked != "") {
+            return Math.tanh(this.cameras[this.cameraPicked].CSize * 16/2/this.focus) * 2 * 180 / Math.PI;
+          } else {
+            return 0;
+          }
+        }
+      },
+      watch: {
+        cameraPicked: function (newCamera, oldCamera) {
+          if(this.cameras[newCamera].availableLenses.length==1){
+            this.lensPicked = this.cameras[newCamera].availableLenses[0]
+          } else {
+            this.lensPicked = ""
+          }
+        },
+        lensPicked: function (newLens, oldLens) {
+          this.focus = newLens ? (this.lenses[newLens].focus ? this.lenses[newLens].focus : this.lenses[newLens].minFocus) : 0;
+        }
+      },
+    })
+  </script>
+</body>
+</html>
