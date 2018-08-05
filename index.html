@@ -56,18 +56,19 @@
       <div>==== 拍摄要求 ====</div>
       <div>1. 16mm螺母占40像素以上</div>
       <div>2. 不小于6米拍</div>
-      <div>3. 10米处FOV至少为26度（按当前测试结果来估算，z30距离目标10米拍摄重复度满足要求）</div>
+      <div>3. 6米处FOV至少为26度（按当前测试结果来估算，z30距离目标6米拍摄重复度满足要求）</div>
+      <div>ps: 以上6米并不精确，为估计值，需要精确测算或做实验</div>
       <hr>
       <div>==== 请输入飞行和拍摄约束条件 ====</div>
       <div>目标物体径向尺寸  <input v-model.number="target.H" type="number">  mm</div>
       <div>在离其 <input v-model.number="target.D" type="number"> 米以上拍摄</div>
       <div>至少成像 <input v-model.number="target.p" type="number">像素</div>
-      <div>要求10米处FOV至少为<input v-model.number="target.fov" type="number">度</div>
+      <div>要求{{target.D}}米处FOV至少为<input v-model.number="target.fov" type="number">度</div>
       <hr>
       <div>==== 成像系统评估 ====</div>
       <div>当前相机镜头组合及约束条件下：</div>
       <div :class="p>=target.p ? 'pass' : 'fail'" >目标物体将在成像画面中占 {{p}} 像素</div>
-      <div :class="equFOV>=target.fov ? 'pass' : 'fail'" >成像系统对角FOV为 {{fov}} 度，当前拍摄约束距离（{{target.D}}米）下，相当于10米距离拍摄的{{equFOV}}度</div>
+      <div :class="fov>=target.fov ? 'pass' : 'fail'" >成像系统对角FOV为 {{fov}} 度</div>
     </div>
     <hr>
   </div>
