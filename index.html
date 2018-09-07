@@ -64,25 +64,35 @@
       <div>在离其 <input v-model.number="target.D" type="number"> 米以上拍摄</div>
       <div>至少成像 <input v-model.number="target.p" type="number">像素</div>
       <div>要求{{target.D}}米处FOV至少为<input v-model.number="target.fov" type="number">度</div>
+      <div><input v-model="target.needZoomByMsdk" type="checkbox"> 需要DJI MSDK支持变焦</div>
       <hr>
       <div>==== 成像系统评估 ====</div>
       <div>当前相机镜头组合及约束条件下：</div>
       <div :class="p>=target.p ? 'pass' : 'fail'" >目标物体将在成像画面中占 {{p}} 像素</div>
       <div :class="fov>=target.fov ? 'pass' : 'fail'" >成像系统对角FOV为 {{fov}} 度</div>
+      <div :class="(cameras[cameraPicked].canZoomByMsdk?1:0)&&(lenses[lensPicked].canZoomByMsdk?1:0)>=target.needZoomByMsdk ? 'pass' : 'fail'">
+          <div v-if="(cameras[cameraPicked].canZoomByMsdk?1:0)&&(lenses[lensPicked].canZoomByMsdk?1:0)" >
+              DJI MSDK支持对该系统变焦
+          </div>
+          <div v-else>
+            DJI MSDK不支持对该系统变焦
+          </div>
+      </div>
     </div>
     <hr>
   </div>
   <script>
     var cameras = {
-      Z30: {CSize: 1/2.8, maxResolution: [1920, 1080], availableLenses: ["Z30自带"]},
+      Z30: {CSize: 1/2.8, maxResolution: [1920, 1080], availableLenses: ["Z30自带"], canZoomByMsdk: true},
       X4S: {CSize: 1, maxResolution: [5472, 3648], availableLenses: ["X4S自带"]},
       X5S: {CSize:4/3, maxResolution: [5280, 3956], availableLenses: [
         "DJI MFT 15mm/1.7 ASPH", "Panasonic Lumix 15mm/1.7", "Panasonic Lumix 14-42mm/3.5-5.6 HD",
         "Olympus M.Zuiko 12mm/2.0", "Olympus M.Zuiko 17mm/1.8", "Olympus M.Zuiko 25mm/1.8", "Olympus M.Zuiko 45mm/1.8", "Olympus M.Zuiko 9-18mm/4.0-5.6 HD"
-      ]}
+      ], canZoomByMsdk: true}
     }
+
     var lenses = {
-      "Z30自带": {minFocus: 4.3, maxFocus: 129, minF: 1.6, maxF: 4.7},
+      "Z30自带": {minFocus: 4.3, maxFocus: 129, minF: 1.6, maxF: 4.7, canZoomByMsdk: true},
       "X4S自带": {focus: 8.8},
       "DJI MFT 15mm/1.7 ASPH": {focus: 15, F:1.7, other: "需安装配重圈和遮光罩"},
       "Panasonic Lumix 15mm/1.7": {focus: 15, F: 1.7, other: "需安装配重圈和遮光罩"},
@@ -92,6 +102,7 @@
       "Olympus M.Zuiko 25mm/1.8": {focus: 25, F: 1.8},
       "Olympus M.Zuiko 45mm/1.8": {focus: 45, F: 1.8},
       "Olympus M.Zuiko 9-18mm/4.0-5.6 HD": {minFocus: 9, maxFocus: 18, minF: 4.0, maxF:5.6},
+      "Olympus M.Zuiko 14-42mm/3.5-5.6 EZ": {minFocus: 14, maxFocus: 42, minF: 3.5, maxF:5.6, canZoomByMsdk: true},
     }
     
     var app = new Vue({
@@ -106,7 +117,8 @@
           D: 6,  //拍摄距离，单位m
           H: 16,  //物体大小，单位mm
           p: 40,  //16mm物体成像至少40pixel
-          fov: 26 //度
+          fov: 26, //度
+          needZoomByMsdk: false,
         },
 
       },
