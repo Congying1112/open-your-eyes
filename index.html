@@ -88,12 +88,17 @@
       X5S: {CSize:4/3, maxResolution: [5280, 3956], availableLenses: [
         "DJI MFT 15mm/1.7 ASPH", "Panasonic Lumix 15mm/1.7", "Panasonic Lumix 14-42mm/3.5-5.6 HD",
         "Olympus M.Zuiko 12mm/2.0", "Olympus M.Zuiko 17mm/1.8", "Olympus M.Zuiko 25mm/1.8", "Olympus M.Zuiko 45mm/1.8", "Olympus M.Zuiko 9-18mm/4.0-5.6 HD"
-      ], canZoomByMsdk: true}
+      ], canZoomByMsdk: true},
+      X7: {CSize: math.sqrt(23.5*23.5+15.7*15.7)/25.4, maxResolution: [6016, 3200], availableLenses: [
+        "DJI DL-S 16mm F2.8 ND ASPH", "DJI DL 24mm F2.8 LS ASPH", "DJI DL 35mm F2.8 LS ASPH",
+        "DJI DL 50mm F2.8 LS ASPH"]},
+      P4P: {CSize: 1, maxResolution: [5472, 3648], availableLenses: ["P4P自带"]},
     }
 
     var lenses = {
       "Z30自带": {minFocus: 4.3, maxFocus: 129, minF: 1.6, maxF: 4.7, canZoomByMsdk: true},
       "X4S自带": {focus: 8.8},
+      "P4P自带": {focus: 8.8},
       "DJI MFT 15mm/1.7 ASPH": {focus: 15, F:1.7, other: "需安装配重圈和遮光罩"},
       "Panasonic Lumix 15mm/1.7": {focus: 15, F: 1.7, other: "需安装配重圈和遮光罩"},
       "Panasonic Lumix 14-42mm/3.5-5.6 HD": {minFocus: 14, maxFocus: 42, minF: 3.5, maxF:5.6},
@@ -103,6 +108,11 @@
       "Olympus M.Zuiko 45mm/1.8": {focus: 45, F: 1.8},
       "Olympus M.Zuiko 9-18mm/4.0-5.6 HD": {minFocus: 9, maxFocus: 18, minF: 4.0, maxF:5.6},
       "Olympus M.Zuiko 14-42mm/3.5-5.6 EZ": {minFocus: 14, maxFocus: 42, minF: 3.5, maxF:5.6, canZoomByMsdk: true},
+      "Olympus M.Zuiko 45mm/1.8": {focus: 45, F: 1.8},
+      "DJI DL-S 16mm F2.8 ND ASPH": {focus: 16, minF: 2.8, maxF: 16},
+      "DJI DL 24mm F2.8 LS ASPH": {focus: 24, minF: 2.8, maxF: 16},
+      "DJI DL 35mm F2.8 LS ASPH": {focus: 35, minF: 2.8, maxF: 16},
+      "DJI DL 50mm F2.8 LS ASPH": {focus: 50, minF: 2.8, maxF: 16}
     }
     
     var app = new Vue({
